@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Závěrečný KVÍZ</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f2f4f7;
+    color: #222;
+}
+
+header {
+    background: #111827;
+    color: white;
+    padding: 18px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+main {
+    max-width: 850px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.08);
+}
+
+button {
+    border: 0;
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px;
+    background: #2563eb;
+    color: white;
+}
+
+button:hover {
+    opacity: .9;
+}
+
+button.secondary {
+    background: #6b7280;
+}
+
+button.danger {
+    background: #dc2626;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    margin: 6px 0;
+}
+
+.answer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.answer-row input[type="text"] {
+    flex: 1;
+}
+
+.question-box {
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 15px 0;
+}
+
+.question-box h3 {
+    margin-top: 0;
+}
+
+.choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #e5e7eb;
+    color: #111;
+    margin: 10px 0;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 17px;
+}
+
+.choice:hover {
+    background: #d1d5db;
+}
+
+.game-card {
+    text-align: center;
+    padding: 30px;
+}
+
+.game-card h2 {
+    font-size: 25px;
+}
+
+.progress {
+    height: 12px;
+    background: #ddd;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #2563eb;
+    width: 0%;
+    transition: width .3s;
+}
+
+.result {
+    text-align: center;
+}
+
+.result-score {
+    font-size: 50px;
+    font-weight: bold;
+    margin: 20px;
+}
+
+.qr {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.small {
+    color: #666;
+    font-size: 14px;
+}
+
+.saved-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    main {
+        padding: 10px;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    .saved-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎓 Závěrečný KVÍZ</h1>
+</header>
+
+<main>
+
+<!-- DOMOV -->
+<section id="home" class="card">
+    <h2>Vítej v Závěrečném KVÍZU!</h2>
+
+    <p>
+        Vytvoř vlastní kvíz, vygeneruj QR kód
+        a pošli ho ostatním.
+    </p>
+
+    <button onclick="showPage('create')">
+        ➕ Vytvořit nový kvíz
+    </button>
+
+    <button class="secondary" onclick="showPage('saved')">
+        💾 Uložené kvízy
+    </button>
+
+    <hr>
+
+    <h3>📱 QR kód pro tvorbu kvízu</h3>
+
+    <p class="small">
+        Naskenuj tento QR kód na telefonu a otevře se stránka pro tvorbu kvízu.
+    </p>
+
+    <div id="createQR" class="qr"></div>
+</section>
+
+
+<!-- VYTVÁŘENÍ -->
+<section id="create" class="hidden">
+
+    <div class="card">
+        <h2>📝 Vytvoření kvízu</h2>
+
+        <label>Název kvízu</label>
+        <input
+            type="text"
+            id="quizTitle"
+            placeholder="Např. Závěrečný test"
+        >
+
+        <div id="questions"></div>
+
+        <button onclick="addQuestion()">
+            ➕ Přidat otázku
+        </button>
+
+        <button onclick="finishQuiz()">
+            ✅ Dokončit kvíz
+        </button>
+
+        <button class="secondary" onclick="showPage('home')">
+            ← Zpět
+        </button>
+    </div>
+
+</section>
+
+
+<!-- VÝSLEDEK VYTVÁŘENÍ -->
+<section id="created" class="card hidden">
+
+    <h2>🎉 Kvíz je připraven!</h2>
+
+    <p>
+        Tento QR kód můžeš poslat ostatním.
+        Každý hráč bude mít vlastní průběh kvízu.
+    </p>
+
+    <div id="quizQR" class="qr"></div>
+
+    <button onclick="copyQuizLink()">
+        📋 Kopírovat odkaz
+    </button>
+
+    <button onclick="startCurrentQuiz()">
+        ▶️ Spustit kvíz
+    </button>
+
+    <button class="secondary" onclick="showPage('home')">
+        🏠 Domů
+    </button>
+
+</section>
+
+
+<!-- ULOŽENÉ KVÍZY -->
+<section id="saved" class="card hidden">
+
+    <h2>💾 Uložené kvízy</h2>
+
+    <div id="savedList"></div>
+
+    <button class="secondary" onclick="showPage('home')">
+        ← Zpět
+    </button>
+</section>
+
+
+<!-- HRA -->
+<section id="game" class="hidden">
+
+    <div class="card game-card">
+
+        <h2 id="gameTitle"></h2>
+
+        <p id="progressText"></p>
+
+        <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <h2 id="questionText"></h2>
+
+        <div id="choices"></div>
+
+    </div>
+
+</section>
+
+
+<!-- VÝSLEDEK -->
+<section id="result" class="card result hidden">
+
+    <h2>🎉 Kvíz dokončen!</h2>
+
+    <p>Všechny otázky máš správně.</p>
+
+    <div class="result-score" id="finalScore"></div>
+
+    <p id="finalDetails"></p>
+
+    <button onclick="restartGame()">
+        🔄 Hrát znovu
+    </button>
+
+    <button class="secondary" onclick="showPage('home')">
+        🏠 Domů
+    </button>
+
+</section>
+
+</main>
+
+
+<script>
+
+let currentQuiz = null;
+let gameQuestions = [];
+let originalQuestionCount = 0;
+let correctAnswers = 0;
+let currentQuizLink = "";
+
+const STORAGE_KEY = "zaverecny_kviz_saved_v1";
+
+
+/* -------------------------
+   ZOBRAZENÍ STRÁNEK
+------------------------- */
+
+function showPage(page) {
+
+    document.querySelectorAll("main > section").forEach(section => {
+        section.classList.add("hidden");
+    });
+
+    document.getElementById(page).classList.remove("hidden");
+
+    if (page === "saved") {
+        renderSaved();
+    }
+}
+
+
+/* -------------------------
+   PŘIDÁNÍ OTÁZKY
+------------------------- */
+
+function addQuestion(data = null) {
+
+    const container = document.getElementById("questions");
+
+    const index = container.children.length;
+
+    const box = document.createElement("div");
+    box.className = "question-box";
+
+    box.innerHTML = `
+        <h3>Otázka ${index + 1}</h3>
+
+        <input
+            type="text"
+            class="question-text"
+            placeholder="Napiš otázku"
+            value="${escapeHTML(data?.question || "")}"
+        >
+
+        <div class="answer-row">
+            <input type="radio"
+                   name="correct-${index}"
+                   value="0"
+                   ${data?.correct === 0 ? "checked" : ""}>
+            <input
+                type="text"
+                class="answer"
+                placeholder="Odpověď A"
+                value="${escapeHTML(data?.answers?.[0] || "")}"
+            >
+        </div>
+
+        <div class="answer-row">
+            <input type="radio"
+                   name="correct-${index}"
+                   value="1"
+                   ${data?.correct === 1 ? "checked" : ""}>
+            <input
+                type="text"
+                class="answer"
+                placeholder="Odpověď B"
+                value="${escapeHTML(data?.answers?.[1] || "")}"
+            >
+        </div>
+
+        <div class="answer-row">
+            <input type="radio"
+                   name="correct-${index}"
+                   value="2"
+                   ${data?.correct === 2 ? "checked" : ""}>
+            <input
+                type="text"
+                class="answer"
+                placeholder="Odpověď C"
+                value="${escapeHTML(data?.answers?.[2] || "")}"
+            >
+        </div>
+
+        <div class="answer-row">
+            <input type="radio"
+                   name="correct-${index}"
+                   value="3"
+                   ${data?.correct === 3 ? "checked" : ""}>
+            <input
+                type="text"
+                class="answer"
+                placeholder="Odpověď D"
+                value="${escapeHTML(data?.answers?.[3] || "")}"
+            >
+        </div>
+
+        <button
+            class="danger"
+            onclick="this.parentElement.remove()"
+        >
+            🗑️ Smazat otázku
+        </button>
+    `;
+
+    container.appendChild(box);
+}
+
+
+/* -------------------------
+   ÚNIK HTML
+------------------------- */
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* -------------------------
+   VYTVOŘENÍ KVÍZU
+------------------------- */
+
+function finishQuiz() {
+
+    const title =
+        document.getElementById("quizTitle").value.trim()
+        || "Závěrečný KVÍZ";
+
+    const boxes =
+        document.querySelectorAll(".question-box");
+
+    if (boxes.length === 0) {
+        alert("Přidej alespoň jednu otázku.");
+        return;
+    }
+
+    const questions = [];
+
+    for (let i = 0; i < boxes.length; i++) {
+
+        const box = boxes[i];
+
+        const question =
+            box.querySelector(".question-text")
+            .value.trim();
+
+        const answers =
+            [...box.querySelectorAll(".answer")]
+            .map(input => input.value.trim());
+
+        const selected =
+            box.querySelector('input[type="radio"]:checked');
+
+        if (!question) {
+            alert(`Otázka ${i + 1} nemá text.`);
+            return;
+        }
+
+        if (answers.some(a => !a)) {
+            alert(`Otázka ${i + 1} nemá vyplněné všechny odpovědi.`);
+            return;
+        }
+
+        if (!selected) {
+            alert(`U otázky ${i + 1} vyber správnou odpověď.`);
+            return;
+        }
+
+        questions.push({
+            question: question,
+            answers: answers,
+            correct: Number(selected.value)
+        });
+    }
+
+    currentQuiz = {
+        id: Date.now().toString(36),
+        title: title,
+        questions: questions
+    };
+
+    saveQuiz(currentQuiz);
+
+    currentQuizLink = createQuizLink(currentQuiz);
+
+    document.getElementById("quizQR").innerHTML = "";
+
+    new QRCode(document.getElementById("quizQR"), {
+        text: currentQuizLink,
+        width: 240,
+        height: 240
+    });
+
+    showPage("created");
+}
+
+
+/* -------------------------
+   QR ODKAZ
+------------------------- */
+
+function createQuizLink(quiz) {
+
+    const encoded =
+        btoa(
+            unescape(
+                encodeURIComponent(
+                    JSON.stringify(quiz)
+                )
+            )
+        );
+
+    return location.href.split("#")[0]
+        + "#quiz="
+        + encodeURIComponent(encoded);
+}
+
+
+/* -------------------------
+   ULOŽENÍ
+------------------------- */
+
+function saveQuiz(quiz) {
+
+    const saved =
+        JSON.parse(
+            localStorage.getItem(STORAGE_KEY) || "[]"
+        );
+
+    const existing =
+        saved.findIndex(q => q.id === quiz.id);
+
+    if (existing >= 0) {
+        saved[existing] = quiz;
+    } else {
+        saved.push(quiz);
+    }
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(saved)
+    );
+}
+
+
+/* -------------------------
+   ULOŽENÉ KVÍZY
+------------------------- */
+
+function renderSaved() {
+
+    const container =
+        document.getElementById("savedList");
+
+    const saved =
+        JSON.parse(
+            localStorage.getItem(STORAGE_KEY) || "[]"
+        );
+
+    container.innerHTML = "";
+
+    if (saved.length === 0) {
+
+        container.innerHTML =
+            "<p>Zatím nemáš žádné uložené kvízy.</p>";
+
+        return;
+    }
+
+    saved.forEach(quiz => {
+
+        const item =
+            document.createElement("div");
+
+        item.className = "saved-item";
+
+        item.innerHTML = `
+            <div>
+                <strong>${escapeHTML(quiz.title)}</strong>
+                <br>
+                <span class="small">
+                    ${quiz.questions.length} otázek
+                </span>
+            </div>
+
+            <div>
+                <button onclick="playSaved('${quiz.id}')">
+                    ▶️ Hrát
+                </button>
+
+                <button onclick="showSavedQR('${quiz.id}')">
+                    📱 QR
+                </button>
+
+                <button
+                    class="danger"
+                    onclick="deleteSaved('${quiz.id}')"
+                >
+                    🗑️
+                </button>
+            </div>
+        `;
+
+        container.appendChild(item);
+    });
+}
+
+
+function playSaved(id) {
+
+    const saved =
+        JSON.parse(
+            localStorage.getItem(STORAGE_KEY) || "[]"
+        );
+
+    const quiz =
+        saved.find(q => q.id === id);
+
+    if (!quiz) return;
+
+    startGame(quiz);
+}
+
+
+function deleteSaved(id) {
+
+    if (!confirm("Opravdu chceš tento kvíz smazat?")) {
+        return;
+    }
+
+    let saved =
+        JSON.parse(
+            localStorage.getItem(STORAGE_KEY) || "[]"
+        );
+
+    saved =
+        saved.filter(q => q.id !== id);
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(saved)
+    );
+
+    renderSaved();
+}
+
+
+function showSavedQR(id) {
+
+    const saved =
+        JSON.parse(
+            localStorage.getItem(STORAGE_KEY) || "[]"
+        );
+
+    const quiz =
+        saved.find(q => q.id === id);
+
+    if (!quiz) return;
+
+    currentQuizLink = createQuizLink(quiz);
+
+    const qrWindow =
+        window.open("", "_blank");
+
+    qrWindow.document.write(`
+        <html>
+        <head>
+        <title>QR - ${escapeHTML(quiz.title)}</title>
+        </head>
+
+        <body style="
+            font-family:Arial;
+            text-align:center;
+            padding:30px;
+        ">
+
+        <h2>${escapeHTML(quiz.title)}</h2>
+
+        <div id="qr"></div>
+
+        <p>Naskenuj QR kód a spusť kvíz.</p>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+
+        <script>
+        new QRCode(
+            document.getElementById("qr"),
+            {
+                text: ${JSON.stringify(currentQuizLink)},
+                width: 300,
+                height: 300
+            }
+        );
+        <\/script>
+
+        </body>
+        </html>
+    `);
+
+    qrWindow.document.close();
+}
+
+
+/* -------------------------
+   SPUŠTĚNÍ AKTUÁLNÍHO KVÍZU
+------------------------- */
+
+function startCurrentQuiz() {
+
+    if (!currentQuiz) return;
+
+    startGame(currentQuiz);
+}
+
+
+function startGame(quiz) {
+
+    currentQuiz = quiz;
+
+    gameQuestions =
+        quiz.questions.map(q => ({
+            question: q.question,
+            answers: [...q.answers],
+            correct: q.correct
+        }));
+
+    originalQuestionCount =
+        gameQuestions.length;
+
+    correctAnswers = 0;
+
+    document.getElementById("gameTitle")
+        .textContent = quiz.title;
+
+    showPage("game");
+
+    renderQuestion();
+}
+
+
+/* -------------------------
+   HRA
+------------------------- */
+
+function renderQuestion() {
+
+    if (gameQuestions.length === 0) {
+        finishGame();
+        return;
+    }
+
+    const question =
+        gameQuestions[0];
+
+    document.getElementById("questionText")
+        .textContent = question.question;
+
+    document.getElementById("progressText")
+        .textContent =
+        `Zbývá ${gameQuestions.length} otázek`;
+
+    const answered =
+        originalQuestionCount -
+        gameQuestions.length;
+
+    const percentage =
+        (answered / originalQuestionCount) * 100;
+
+    document.getElementById("progressBar")
+        .style.width = percentage + "%";
+
+    const choices =
+        document.getElementById("choices");
+
+    choices.innerHTML = "";
+
+    question.answers.forEach((answer, index) => {
+
+        const button =
+            document.createElement("button");
+
+        button.className = "choice";
+
+        button.textContent = answer;
+
+        button.onclick =
+            () => answerQuestion(index);
+
+        choices.appendChild(button);
+    });
+}
+
+
+/* -------------------------
+   ODPOVĚĎ
+------------------------- */
+
+function answerQuestion(index) {
+
+    const question =
+        gameQuestions[0];
+
+    const buttons =
+        document.querySelectorAll(".choice");
+
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
+
+    if (index === question.correct) {
+
+        buttons[index].style.background =
+            "#22c55e";
+
+        buttons[index].style.color =
+            "white";
+
+        correctAnswers++;
+
+        setTimeout(() => {
+
+            gameQuestions.shift();
+
+            renderQuestion();
+
+        }, 600);
+
+    } else {
+
+        buttons[index].style.background =
+            "#ef4444";
+
+        buttons[index].style.color =
+            "white";
+
+        setTimeout(() => {
+
+            const failed =
+                gameQuestions.shift();
+
+            gameQuestions.push(failed);
+
+            renderQuestion();
+
+        }, 700);
+    }
+}
+
+
+/* -------------------------
+   KONEC HRY
+------------------------- */
+
+function finishGame() {
+
+    const score =
+        correctAnswers;
+
+    document.getElementById("finalScore")
+        .textContent =
+        `${score} / ${originalQuestionCount}`;
+
+    document.getElementById("finalDetails")
+        .textContent =
+        `Správně jsi vyřešil/a všech ${originalQuestionCount} otázek.`;
+
+    showPage("result");
+}
+
+
+function restartGame() {
+
+    if (!currentQuiz) return;
+
+    startGame(currentQuiz);
+}
+
+
+/* -------------------------
+   KOPÍROVÁNÍ ODKAZU
+------------------------- */
+
+function copyQuizLink() {
+
+    if (!currentQuizLink) return;
+
+    navigator.clipboard
+        .writeText(currentQuizLink)
+        .then(() => {
+            alert("Odkaz byl zkopírován.");
+        })
+        .catch(() => {
+            prompt(
+                "Zkopíruj tento odkaz:",
+                currentQuizLink
+            );
+        });
+}
+
+
+/* -------------------------
+   NAČTENÍ QR KVÍZU
+------------------------- */
+
+function loadQuizFromURL() {
+
+    const hash =
+        location.hash;
+
+    if (!hash.startsWith("#quiz=")) {
+        return;
+    }
+
+    try {
+
+        const encoded =
+            decodeURIComponent(
+                hash.substring(6)
+            );
+
+        const json =
+            decodeURIComponent(
+                escape(
+                    atob(encoded)
+                )
+            );
+
+        const quiz =
+            JSON.parse(json);
+
+        startGame(quiz);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Tento QR odkaz není platný."
+        );
+    }
+}
+
+
+/* -------------------------
+   START
+------------------------- */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        new QRCode(
+            document.getElementById("createQR"),
+            {
+                text:
+                    location.href.split("#")[0]
+                    + "#create",
+
+                width: 220,
+                height: 220
+            }
+        );
+
+        loadQuizFromURL();
+
+        if (!location.hash.startsWith("#quiz=")) {
+            addQuestion();
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>
